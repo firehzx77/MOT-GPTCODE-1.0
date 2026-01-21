@@ -104,31 +104,6 @@ export default function ResourcesPage() {
             </div>
 
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
-              <h3 className="font-bold">外部学习资料</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-                以下是可公开访问的 MOT 概念资料（偏定义/理论），你可用作课前阅读与提问素材。
-              </p>
-              <ul className="mt-4 space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <span className="material-symbols-outlined text-base text-slate-400">link</span>
-                  <a className="underline text-primary" href="https://api-docs.deepseek.com/" target="_blank" rel="noreferrer">DeepSeek API Docs（用于理解本产品的模型接口）</a>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="material-symbols-outlined text-base text-slate-400">link</span>
-                  <a className="underline text-primary" href="https://en.wikipedia.org/wiki/Moment_of_truth_(marketing)" target="_blank" rel="noreferrer">Wikipedia：Moment of truth (marketing)</a>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="material-symbols-outlined text-base text-slate-400">link</span>
-                  <a className="underline text-primary" href="https://www.techtarget.com/searchcustomerexperience/definition/moment-of-truth-marketing-MOT" target="_blank" rel="noreferrer">TechTarget：MOT 定义与应用</a>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="material-symbols-outlined text-base text-slate-400">link</span>
-                  <a className="underline text-primary" href="https://csl.wpcarey.asu.edu/moment-truth-co-creation-perspective" target="_blank" rel="noreferrer">ASU W. P. Carey：MOT 与服务质量视角</a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
               <h3 className="font-bold">版本说明</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
                 当前版本为文字对练 + 自动评价。语音（TTS/ASR）与团队数据同步可作为下一阶段迭代。
