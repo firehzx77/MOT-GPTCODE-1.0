@@ -159,6 +159,28 @@ export default function ReportPage() {
 
           {/* Detail */}
           <div className="col-span-12 lg:col-span-8 space-y-6">
+            {ev.raw ? (
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-2xl p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-bold text-amber-900 dark:text-amber-100">原始评分输出</h3>
+                    <p className="text-sm text-amber-800/80 dark:text-amber-200/80 mt-1">
+                      由于模型输出未能被解析为结构化 JSON，本次报告以“原文”方式展示。你依然可以据此复盘关键时刻、提炼三问/兜底/惊喜/闭环。
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(ev.raw || '')}
+                    className="shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white font-bold"
+                  >
+                    复制原文
+                  </button>
+                </div>
+                <pre className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-amber-900 dark:text-amber-100 bg-white/70 dark:bg-slate-900/40 border border-amber-200 dark:border-amber-900 rounded-2xl p-4 max-h-[420px] overflow-auto">
+{ev.raw}
+                </pre>
+              </div>
+            ) : null}
+
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
               <h3 className="font-bold">MOT 四阶段表现</h3>
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">

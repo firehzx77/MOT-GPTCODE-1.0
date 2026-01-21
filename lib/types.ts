@@ -1,4 +1,4 @@
-export type Industry = 'retail' | 'bank' | 'telecom' | 'hotel';
+export type Industry = 'retail' | 'bank' | 'telecom' | 'hotel' | 'logistics';
 export type Persona = 'senior_angry' | 'business_savvy' | 'tech_young';
 export type Voice = 'male_calm' | 'female_standard' | 'female_energetic' | 'male_strict';
 
@@ -42,6 +42,8 @@ export type TrainingSession = {
 export type Evaluation = {
   sessionId: string;
   createdAt: number;
+  /** 当模型输出无法解析为结构化 JSON 时，保留原始文本供展示/排查 */
+  raw?: string;
   overallScore: number; // 0-100
   title: string;
   summary: string;

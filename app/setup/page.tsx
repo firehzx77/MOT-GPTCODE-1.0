@@ -4,30 +4,39 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppHeader from '@/components/AppHeader';
 import { industries, personas, findScenario } from '@/lib/scenarios';
-import type { Industry, Persona, Voice, TrainingSession } from '@/lib/types';
+import type { Industry, Persona, TrainingSession } from '@/lib/types';
 import { uid, saveSession } from '@/lib/storage';
 
-const voiceOptions: Array<{ id: Voice; label: string }> = [
-  { id: 'male_calm', label: '男声·沉稳' },
-  { id: 'female_standard', label: '女声·标准' },
-  { id: 'female_energetic', label: '女声·活力' },
-  { id: 'male_strict', label: '男声·严谨' }
-];
+function difficultyLabel(d: 'low' | 'mid' | 'high') {
+  return d === 'high' ? '高' : d === 'mid' ? '中' : '低';
+}
+
+function difficultyDots(d: 'low' | 'mid' | 'high') {
+  // 5 dots: low=2, mid=3, high=4 (留一个空做“极限”)
+  const filled = d === 'low' ? 2 : d === 'mid' ? 3 : 4;
+  return { filled, total: 5 };
+}
 
 export default function SetupPage() {
   const router = useRouter();
   const [industry, setIndustry] = useState<Industry>('retail');
   const [persona, setPersona] = useState<Persona>('business_savvy');
-  const [voice, setVoice] = useState<Voice>('female_standard');
 
   const scenario = useMemo(() => findScenario(industry, persona), [industry, persona]);
+  const dots = useMemo(() => difficultyDots(scenario.difficulty), [scenario.difficulty]);
+
+  function reset() {
+    setIndustry('retail');
+    setPersona('business_savvy');
+  }
 
   function start() {
     const id = uid('session');
     const session: TrainingSession = {
       id,
       createdAt: Date.now(),
-      config: { scenarioId: scenario.id, voice },
+      // 本稿暂不做“音色选择”，保留字段用于后续语音扩展
+      config: { scenarioId: scenario.id, voice: 'female_standard' },
       messages: [
         {
           role: 'assistant',
@@ -42,139 +51,146 @@ export default function SetupPage() {
     router.push(`/practice/${id}`);
   }
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <AppHeader title="MOT 训练中心" subtitle="场景配置 · 选择行业/客户/难度" />
+  const right = (
+    <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+      <span className="material-symbols-outlined text-slate-500">person</span>
+    </div>
+  );
 
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
-          <div>
-            <p className="text-sm text-slate-400">训练中心 / 场景配置</p>
-            <h2 className="text-4xl font-extrabold tracking-tight mt-2">
-              MOT 关键时刻<span className="text-primary">交互练习</span>
-            </h2>
-            <p className="text-slate-400 mt-2 max-w-2xl">
-              AI 扮演客户，您扮演服务人员。按 Explore → Offer → Action → Confirm 四步把关键时刻打赢。
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <AppHeader title="Moments of Truth" subtitle="AI 交互式训练引擎" stepLabel="场景配置与初始化" right={right} />
+
+      <main className="max-w-[1440px] mx-auto px-6 py-10">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center">
+            <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">配置您的训练场景</h2>
+            <p className="mt-3 text-slate-600 dark:text-slate-300">
+              请选择行业背景与客户画像，系统将为您生成真实的“关键时刻”服务挑战。
             </p>
           </div>
 
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 w-full md:w-[420px]">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs text-slate-400">本次训练场景</p>
-                <p className="font-bold text-lg mt-1">{scenario.title}</p>
-                <p className="text-sm text-slate-400 mt-1">客户：{scenario.customerName} · {scenario.customerIntro}</p>
-              </div>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/20 text-primary">
-                难度：{scenario.difficulty === 'high' ? '高' : scenario.difficulty === 'mid' ? '中' : '低'}
-              </span>
+          {/* Step 1 */}
+          <section className="mt-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">1</div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">选择行业领域</h3>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-              {scenario.constraints.slice(0, 4).map((c) => (
-                <div key={c} className="px-3 py-2 rounded-lg bg-slate-950/60 border border-slate-800 text-slate-300">
-                  {c}
-                </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {industries.map((it) => (
+                <button
+                  key={it.id}
+                  onClick={() => setIndustry(it.id)}
+                  className={
+                    "text-left rounded-2xl p-5 border transition bg-white dark:bg-slate-900 " +
+                    (industry === it.id
+                      ? 'border-primary ring-2 ring-primary/20'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700')
+                  }
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${it.colorClass} bg-opacity-20`}>
+                      <span className="material-symbols-outlined">{it.icon}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{it.name}</p>
+                      {/* 本稿：选择时不展示场景介绍 */}
+                    </div>
+                  </div>
+                </button>
               ))}
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div className="grid grid-cols-12 gap-8">
-          <div className="col-span-12 lg:col-span-8 space-y-8">
-            <section>
-              <h3 className="text-xl font-bold mb-4">1) 选择行业场景</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {industries.map((it) => (
-                  <button
-                    key={it.id}
-                    onClick={() => setIndustry(it.id)}
-                    className={`text-left rounded-2xl p-5 border transition ${industry === it.id ? 'bg-primary/15 border-primary' : 'bg-slate-900/40 border-slate-800 hover:bg-slate-900/70'}`}
-                  >
+          {/* Step 2 */}
+          <section className="mt-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">2</div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">选择客户画像</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {personas.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPersona(p.id)}
+                  className={
+                    "text-left rounded-2xl p-5 border transition bg-white dark:bg-slate-900 " +
+                    (persona === p.id
+                      ? 'border-primary ring-2 ring-primary/20'
+                      : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700')
+                  }
+                >
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${it.colorClass} bg-opacity-20`}>
-                        <span className="material-symbols-outlined">{it.icon}</span>
+                      <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                        <span className="material-symbols-outlined text-slate-500">face</span>
                       </div>
                       <div>
-                        <p className="font-bold">{it.name}</p>
-                        <p className="text-xs text-slate-400 mt-1">{it.desc}</p>
+                        <p className="font-bold text-slate-900 dark:text-slate-100">{p.name}</p>
+                        {/* 本稿：选择时不展示客户介绍 */}
                       </div>
                     </div>
-                  </button>
-                ))}
-              </div>
-            </section>
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                      难度: {p.difficulty === 'high' ? '高' : p.difficulty === 'mid' ? '中' : '低'}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
 
-            <section>
-              <h3 className="text-xl font-bold mb-4">2) 选择客户类型（AI 扮演）</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {personas.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setPersona(p.id)}
-                    className={`text-left rounded-2xl p-5 border transition ${persona === p.id ? 'bg-primary/15 border-primary' : 'bg-slate-900/40 border-slate-800 hover:bg-slate-900/70'}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-bold">{p.name}</p>
-                        <p className="text-xs text-slate-400 mt-1">{p.desc}</p>
-                      </div>
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-800">
-                        {p.difficulty === 'high' ? '挑战' : p.difficulty === 'mid' ? '进阶' : '入门'}
-                      </span>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      {p.tags.map(t => (
-                        <span key={t} className="px-2 py-1 rounded-full bg-slate-800/80 text-slate-300 text-[11px]">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </button>
+          {/* Bottom Bar */}
+          <div className="mt-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+              <span className="material-symbols-outlined text-slate-400">info</span>
+              <span>
+                已选：
+                <b className="text-slate-900 dark:text-slate-100">{industries.find(i => i.id === industry)?.name}</b>
+                {' | '}
+                <b className="text-slate-900 dark:text-slate-100">{personas.find(x => x.id === persona)?.name}</b>
+                {' | '}
+                场景复杂度
+              </span>
+              <span className="inline-flex items-center gap-1 ml-1">
+                {Array.from({ length: dots.total }).map((_, idx) => (
+                  <span
+                    key={idx}
+                    className={
+                      'w-2 h-2 rounded-full ' +
+                      (idx < dots.filled ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700')
+                    }
+                  />
                 ))}
-              </div>
-            </section>
-          </div>
-
-          <div className="col-span-12 lg:col-span-4 space-y-6">
-            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-lg font-bold mb-3">3) 选择对话音色（可选）</h3>
-              <p className="text-sm text-slate-400 mb-4">当前版本以文字对练为主，音色用于后续扩展语音TTS。</p>
-              <div className="grid grid-cols-2 gap-3">
-                {voiceOptions.map(v => (
-                  <button
-                    key={v.id}
-                    onClick={() => setVoice(v.id)}
-                    className={`px-3 py-3 rounded-xl border text-sm font-semibold transition ${voice === v.id ? 'bg-primary text-white border-primary' : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-900'}`}
-                  >
-                    {v.label}
-                  </button>
-                ))}
-              </div>
+              </span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">（{difficultyLabel(scenario.difficulty)}）</span>
             </div>
 
-            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-lg font-bold mb-3">4) 开始训练</h3>
-              <p className="text-sm text-slate-400 mb-4">建议第一轮先“打通四步”，第二轮开始追求“兜底 + 惊喜”。</p>
+            <div className="flex items-center justify-end gap-3">
               <button
-                onClick={start}
-                className="w-full py-3.5 rounded-xl bg-primary hover:opacity-95 transition font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                type="button"
+                onClick={reset}
+                className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
               >
-                <span className="material-symbols-outlined">play_circle</span>
-                开始训练
+                重置配置
               </button>
-              <div className="mt-4 text-xs text-slate-400">
-                提示：进入练习后，你可以用右侧“引导式提问”按钮快速插入探询语句。
-              </div>
-            </div>
-
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-sm font-bold text-slate-200">本次初始客户话术</h3>
-              <p className="mt-3 text-sm text-slate-300">“{scenario.initialCustomerMessage}”</p>
-              <div className="mt-4 text-xs text-slate-500">你要做的第一件事：共情 + 追问“你最担心的是什么？”</div>
+              <button
+                type="button"
+                onClick={start}
+                className="px-6 py-2.5 rounded-xl bg-primary text-white font-bold hover:opacity-95 transition flex items-center gap-2"
+              >
+                开始训练
+                <span className="material-symbols-outlined text-base">rocket_launch</span>
+              </button>
             </div>
           </div>
+
+          <p className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">
+            小技巧：先共情，再问“担心点 / 成功标准 / 希望支持”，然后给主方案 + 兜底 + 低成本惊喜。
+          </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

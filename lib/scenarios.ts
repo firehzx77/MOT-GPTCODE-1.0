@@ -4,7 +4,8 @@ export const industries: Array<{ id: Industry; name: string; desc: string; icon:
   { id: 'retail', name: '零售服务', desc: '退换货、物流延迟及会员积分纠纷。', icon: 'shopping_cart', colorClass: 'bg-blue-100 text-blue-600' },
   { id: 'bank', name: '金融银行业', desc: '理财咨询、转账失败或账户异常提醒。', icon: 'account_balance', colorClass: 'bg-emerald-100 text-emerald-600' },
   { id: 'telecom', name: '电信通讯', desc: '资费账单争议、网络覆盖及宽带报修。', icon: 'router', colorClass: 'bg-purple-100 text-purple-600' },
-  { id: 'hotel', name: '酒店旅游', desc: '预订冲突、客房质量及加急服务响应。', icon: 'home_repair_service', colorClass: 'bg-orange-100 text-orange-600' }
+  { id: 'hotel', name: '酒店旅游', desc: '预订冲突、客房质量及加急服务响应。', icon: 'home_repair_service', colorClass: 'bg-orange-100 text-orange-600' },
+  { id: 'logistics', name: '物流货运', desc: '延误、丢损、清关与可追踪进度沟通。', icon: 'local_shipping', colorClass: 'bg-cyan-100 text-cyan-600' }
 ];
 
 export const personas: Array<{ id: Persona; name: string; difficulty: Scenario['difficulty']; desc: string; tags: string[] }> = [
@@ -28,6 +29,49 @@ export const scenarios: Scenario[] = [
     initialCustomerMessage: '我已经等了两个多星期了。单号显示已送达，但我什么都没收到。这是我第三次打电话询问这件事了。',
     hiddenExpectationsHints: ['客户真正担心：影响出差/工作安排', '客户要“看见诚意”：明确行动+可追踪', '客户需要明确的时间点与兜底'],
     potentialSurprises: ['提供“优先升级处理”并承诺关键节点短信/邮件同步', '赠送加急运费差额（公司内部成本）', '提供一次“专属客服”回访确认到货']
+  },
+  // Logistics
+  {
+    id: 'logistics_business_delay',
+    title: '国际货运延误（赶工期/停线风险）',
+    industry: 'logistics',
+    persona: 'business_savvy',
+    difficulty: 'mid',
+    customerName: '张总',
+    customerIntro: '精明的商务人士（效率优先、结果导向）',
+    background: ['运单 #LZ-23019 - 海运转空运评估中', '港口拥堵导致预计到港延后 3 天', '客户工厂有排产窗口，可能出现停线损失'],
+    constraints: ['不得承诺无法兑现的清关/到货时效', '信息必须可核验（节点/截图/单据）', '必须提供“兜底路径”（替代线路/分批/加急）'],
+    initialCustomerMessage: '你们这票货又延误了三天？我排产窗口就这几天，晚了我直接停线。你给我一个能落地的解决方案。',
+    hiddenExpectationsHints: ['客户最担心：停线损失和对内解释', '成功标准：给到明确节点与到货窗口、并有兜底', '希望支持：替代线路/分批方案 + 每日可追踪回报'],
+    potentialSurprises: ['给客户一个“每日固定时间进度回报”并主动发送节点截图', '提供一页式“进度看板”（无需额外成本）', '优先协调到港后快速提货/预约仓位（内部协同）']
+  },
+  {
+    id: 'logistics_senior_damage',
+    title: '货物破损理赔（流程复杂，客户焦虑）',
+    industry: 'logistics',
+    persona: 'senior_angry',
+    difficulty: 'high',
+    customerName: '周老板',
+    customerIntro: '愤怒的高龄客户（传统保守、极度焦虑）',
+    background: ['到货外箱破损，部分货物受潮', '客户第一次遇到理赔，不熟悉材料', '客户担心“推来推去、赔不了”'],
+    constraints: ['先安抚再讲流程，避免术语', '必须给到人工兜底：代整理材料/上门取证预约', '承诺边界要清晰：哪些可赔、时限、关键节点'],
+    initialCustomerMessage: '我货都破成这样了，你们还让我填一堆表？我就问一句：到底赔不赔？你别让我来回折腾！',
+    hiddenExpectationsHints: ['客户担心：钱赔不回来、时间拖很久', '成功标准：今天就确认责任路径和材料清单', '希望支持：有人一步步带着办，最好少跑一趟'],
+    potentialSurprises: ['帮客户把“材料清单”做成一张图并发到微信/短信', '预约一次上门取证时间（内部协调）', '在可行范围内先启动“预赔付申请”提升信任']
+  },
+  {
+    id: 'logistics_tech_tracking',
+    title: '轨迹停滞/疑似丢件（要证据与可追踪）',
+    industry: 'logistics',
+    persona: 'tech_young',
+    difficulty: 'low',
+    customerName: 'Kiki',
+    customerIntro: '科技达人青年（快速反馈、网络敏感）',
+    background: ['跨境小包轨迹 48 小时未更新', '客户是电商卖家，担心差评和平台罚分', '客户要求立刻给“证据链”和解决时限'],
+    constraints: ['解释必须透明可核验', '给出下一次回报时间点', '提供兜底：补发/改派/赔付路径说明'],
+    initialCustomerMessage: '轨迹两天没动了，你们是不是丢件？我店铺要被差评了。你给我证据和明确时限。',
+    hiddenExpectationsHints: ['客户担心：差评/罚分与平台申诉材料', '成功标准：给到可截图的查询/工单进度与处理时限', '希望支持：补发/改派的兜底 + 主动同步'],
+    potentialSurprises: ['给客户一份“平台申诉材料模板”（低成本）', '设置关键节点自动回报（短信/邮件）', '提供一次“优先查件工单”并告知回报时点']
   },
   {
     id: 'retail_senior_refund',

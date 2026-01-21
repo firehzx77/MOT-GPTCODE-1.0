@@ -120,6 +120,40 @@ export default function PracticePage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || '评价失败');
 
+      // 兼容：若模型输出无法解析为结构化 JSON，则返回 raw 文本（用于报告页展示）
+      if (!json?.data) {
+        const defaultStageBox = { stars: 3, strengths: [], gaps: [] };
+        const ev: Evaluation = {
+          sessionId: session.id,
+          createdAt: Date.now(),
+          raw: String(json?.raw || ''),
+          overallScore: 0,
+          title: '评分报告（原始文本）',
+          summary: '模型输出未能解析为结构化评分报告，已为你保留原始文本。你仍可据此复盘对话并提炼改进点。',
+          motValueScore: 0,
+          motValueRationale: '',
+          dimensions: { empathy: 0, logic: 0, compliance: 0, efficiency: 0, professionalism: 0 },
+          stages: {
+            explore: defaultStageBox,
+            offer: defaultStageBox,
+            action: defaultStageBox,
+            confirm: defaultStageBox
+          },
+          keyMoments: [],
+          checklist: {
+            askedWorryQuestion: false,
+            askedSuccessCriteriaQuestion: false,
+            askedSupportIfHappensQuestion: false,
+            proposedFallback: false,
+            proposedDelight: false
+          },
+          nextTime: { threeMoves: [], sampleScripts: [] }
+        };
+        saveEvaluation(ev);
+        router.push(`/report/${session.id}`);
+        return;
+      }
+
       const d = json.data;
       const defaultStageBox = { stars: 3, strengths: [], gaps: [] };
       const safeStages = d.stages || {
